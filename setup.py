@@ -5,14 +5,16 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="deepfake-ecg", # Replace with your own username
-    version="0.0.1",
+    version="1.0.0",
     author="Vajira Thambawita",
     author_email="vlbthambawita@gmail.com",
-    description="deepfake ECG generator for 10s long 8 or 12 leads ECGs.",
+    description="Unlimited unique deepfake ECG generator.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/vlbthambawita/deepfake-ecg",
     packages=setuptools.find_packages(),
+    include_package_data=True,
+    package_data={'deepfakeecg': ['checkpoints/g_stat.pt']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
@@ -23,8 +25,7 @@ setuptools.setup(
         'numpy',
         'tqdm',
         'torch',
-        'torchvision',
-        'pillow',
-        'vector-quantize-pytorch>=0.1.0'
+        'pandas',
+
   ],
 )

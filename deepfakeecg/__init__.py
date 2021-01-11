@@ -1,1 +1,2 @@
-from .generate import generate
+from deepfakeecg.models import Generator
+from deepfakeecg.deepfakeecg import generate
