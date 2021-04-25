@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="deepfake-ecg", # Replace with your own username
-    version="1.0.0",
+    version="1.1.0",
     author="Vajira Thambawita",
     author_email="vlbthambawita@gmail.com",
     description="Unlimited 10-sec 8-leads Deep Fake ECG generator.",
@@ -25,6 +25,5 @@ setuptools.setup(
         'numpy',
         'tqdm',
         'pandas',
-
   ],
 )
