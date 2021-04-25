@@ -13,6 +13,17 @@ pip install deepfake-ecg
 
 ## Usage
 
+
+The following fucntions can generate Deep Fake ECGs with 8-lead values  [lead names from first coloum to eighth colum: **'I','II','V1','V2','V3','V4','V5','V6'**] for 10s (5000 values per lead). These 8-leads format can be converted to 12-leads format using the following equations. 
+
+```
+lead III value = (lead II value) - (lead I value)
+lead aVR value = -0.5*(lead I value + lead II value)
+lead aVL value = lead I value - 0.5 * lead II value
+lead aVF value = lead II value - 0.5 * lead I value
+
+```
+
 ### Run on CPU (default setting)
 
 ```python

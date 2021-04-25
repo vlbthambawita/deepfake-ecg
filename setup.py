@@ -8,7 +8,7 @@ setuptools.setup(
     version="1.0.0",
     author="Vajira Thambawita",
     author_email="vlbthambawita@gmail.com",
-    description="Unlimited unique deepfake ECG generator.",
+    description="Unlimited 10-sec 8-leads Deep Fake ECG generator.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/vlbthambawita/deepfake-ecg",
@@ -24,7 +24,6 @@ setuptools.setup(
     install_requires=[
         'numpy',
         'tqdm',
-        'torch',
         'pandas',
 
   ],
