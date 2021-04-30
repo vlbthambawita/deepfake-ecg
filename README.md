@@ -3,7 +3,7 @@ Generate unlimited realistic deepfake ECGs.
 
 ## Installation
 
-Use the package manager [pip](https://pypi.org/project/deepfake-ecg/) to install deepfake-ecg.
+Use the package manager [pip](https://pypi.org/project/deepfake-ecg/) to install deepfake-ecg generator.
 
 
 
@@ -14,7 +14,7 @@ pip install deepfake-ecg
 ## Usage
 
 
-The following fucntions can generate Deep Fake ECGs with 8-lead values  [lead names from first coloum to eighth colum: **'I','II','V1','V2','V3','V4','V5','V6'**] for 10s (5000 values per lead). These 8-leads format can be converted to 12-leads format using the following equations. 
+The generator functions can generate DeepFake ECGs with 8-lead values  [lead names from first coloum to eighth colum: **'I','II','V1','V2','V3','V4','V5','V6'**] for 10s (5000 values per lead). These 8-leads format can be converted to 12-leads format using the following equations. 
 
 ```
 lead III value = (lead II value) - (lead I value)
@@ -57,15 +57,11 @@ deepfakeecg.generate(5, ".", start_id=0, run_device="cuda") # Generate 5 ECGs to
 ![GitHub Logo](samples/2879.png)
 
 
-
-
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
 
-## For more details: 
-Please contact: vajira@simula.no, michael@simula.no
 
 ## Citation:
 ```latex
@@ -85,3 +81,6 @@ Please contact: vajira@simula.no, michael@simula.no
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## For more details: 
+Please contact: vajira@simula.no, michael@simula.no
