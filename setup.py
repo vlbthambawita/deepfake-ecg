@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="deepfake-ecg", # Replace with your own username
-    version="1.1.1",
+    version="1.1.2",
     author="Vajira Thambawita",
     author_email="vlbthambawita@gmail.com",
     description="Unlimited 10-sec 8-leads Deep Fake ECG generator.",

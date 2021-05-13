@@ -1,5 +1,8 @@
 # deepfake-ecg
-Generate unlimited realistic deepfake ECGs.  
+
+## [Paper](https://doi.org/10.1101/2021.04.27.21256189) | [GitHub](https://github.com/vlbthambawita/deepfake-ecg) | [Pre-generated ECGs (150k)](https://osf.io/6hved/)
+
+Generate unlimited realistic deepfake ECGs using the deep generative model:Pulse2pulse introduced in our full paper here: https://doi.org/10.1101/2021.04.27.21256189 (DeepFake electrocardiograms: the key for open science for artificial intelligence in medicine) 
 
 ## Installation
 
@@ -69,14 +72,13 @@ Please make sure to update tests as appropriate.
 	author = {Thambawita, Vajira Lasantha and Isaksen, Jonas L and Hicks, Steven and Ghouse, Jonas and Ahlberg, Gustav and Linneberg, Allan and Grarup, Niels and Ellervik, Christina and Olesen, Morten Salling and Hansen, Torben and Graff, Claus and Holstein-Rathlou, Niels-Henrik and Str{\"u}mke, Inga and Hammer, Hugo L. and Maleckar, Mary M and Halvorsen, P{\aa}l and Riegler, Michael A. and Kanters, J{\o}rgen K.},
 	doi = {10.1101/2021.04.27.21256189},
 	elocation-id = {2021.04.27.21256189},
-	eprint = {https://www.medrxiv.org/content/early/2021/04/30/2021.04.27.21256189.full.pdf},
 	journal = {medRxiv},
 	publisher = {Cold Spring Harbor Laboratory Press},
-	title = {DeepFake electrocardiograms: the beginning of the end for privacy issues in medicine},
-	url = {https://www.medrxiv.org/content/early/2021/04/30/2021.04.27.21256189},
-	year = {2021},
-	Bdsk-Url-1 = {https://www.medrxiv.org/content/early/2021/04/30/2021.04.27.21256189},
-	Bdsk-Url-2 = {https://doi.org/10.1101/2021.04.27.21256189}}
+	title = {DeepFake electrocardiograms: the key for open science for artificial intelligence in medicine},
+	url = {https://doi.org/10.1101/2021.04.27.21256189},
+	year = {2021}
+}
+	
 ```
 
 ## License
