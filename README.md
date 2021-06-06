@@ -1,8 +1,16 @@
 # deepfake-ecg
 
 ## [Paper](https://doi.org/10.1101/2021.04.27.21256189) | [GitHub](https://github.com/vlbthambawita/deepfake-ecg) | [Pre-generated ECGs (150k)](https://osf.io/6hved/)
+---
+
+## [Pulse2Pulse - development repo](https://github.com/vlbthambawita/Pulse2Pulse)
+If you want to train the model from scratch, please refere our development repository Pulse2Pulse.
+
+---
 
 Generate unlimited realistic deepfake ECGs using the deep generative model:Pulse2pulse introduced in our full paper here: https://doi.org/10.1101/2021.04.27.21256189 (DeepFake electrocardiograms: the key for open science for artificial intelligence in medicine) 
+
+
 
 ## Installation
 
