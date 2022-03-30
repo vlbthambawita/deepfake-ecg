@@ -76,17 +76,16 @@ Please make sure to update tests as appropriate.
 
 ## Citation:
 ```latex
-@article{ecg-pulse2pulse,
-	author = {Thambawita, Vajira Lasantha and Isaksen, Jonas L and Hicks, Steven and Ghouse, Jonas and Ahlberg, Gustav and Linneberg, Allan and Grarup, Niels and Ellervik, Christina and Olesen, Morten Salling and Hansen, Torben and Graff, Claus and Holstein-Rathlou, Niels-Henrik and Str{\"u}mke, Inga and Hammer, Hugo L. and Maleckar, Mary M and Halvorsen, P{\aa}l and Riegler, Michael A. and Kanters, J{\o}rgen K.},
-	doi = {10.1101/2021.04.27.21256189},
-	elocation-id = {2021.04.27.21256189},
-	journal = {medRxiv},
-	publisher = {Cold Spring Harbor Laboratory Press},
-	title = {DeepFake electrocardiograms: the key for open science for artificial intelligence in medicine},
-	url = {https://doi.org/10.1101/2021.04.27.21256189},
-	year = {2021}
-}
-	
+@article{thambawita2021deepfake,
+  title={DeepFake electrocardiograms using generative adversarial networks are the beginning of the end for privacy issues in medicine},
+  author={Thambawita, Vajira and Isaksen, Jonas L and Hicks, Steven A and Ghouse, Jonas and Ahlberg, Gustav and Linneberg, Allan and Grarup, Niels and Ellervik, Christina and Olesen, Morten Salling and Hansen, Torben and others},
+  journal={Scientific reports},
+  volume={11},
+  number={1},
+  pages={1--8},
+  year={2021},
+  publisher={Nature Publishing Group}
+}	
 ```
 
 ## License
