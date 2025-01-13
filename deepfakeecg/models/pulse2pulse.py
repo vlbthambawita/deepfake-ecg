@@ -1,4 +1,4 @@
- # Modified version:Vajira Thambawita
+# Modified version:Vajira Thambawita
 
 import torch
 import torch.nn as nn
@@ -19,10 +19,11 @@ class Transpose1dLayer(nn.Module):
 
     def forward(self, x):
         if self.upsample:
-            #x = torch.cat((x, in_feature), 1)
+            # x = torch.cat((x, in_feature), 1)
             return self.conv1d(self.reflection_pad(self.upsample_layer(x)))
         else:
             return self.Conv1dTrans(x)
+
 
 class Transpose1dLayer_multi_input(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding=11, upsample=None, output_padding=1):
@@ -61,33 +62,33 @@ class Pulse2pulseGenerator(nn.Module):
         if upsample:
             stride = 1
             upsample = 5
-        self.deconv_1 = Transpose1dLayer(5 * model_size , 5 * model_size, 25, stride, upsample=upsample)
+        self.deconv_1 = Transpose1dLayer(5 * model_size, 5 * model_size, 25, stride, upsample=upsample)
         self.deconv_2 = Transpose1dLayer_multi_input(5 * model_size * 2, 3 * model_size, 25, stride, upsample=upsample)
-        self.deconv_3 = Transpose1dLayer_multi_input(3 * model_size * 2,  model_size, 25, stride, upsample=upsample)
+        self.deconv_3 = Transpose1dLayer_multi_input(3 * model_size * 2, model_size, 25, stride, upsample=upsample)
        # self.deconv_4 = Transpose1dLayer( model_size, model_size, 25, stride, upsample=upsample)
-        self.deconv_5 = Transpose1dLayer_multi_input( model_size * 2, int(model_size / 2), 25, stride, upsample=2)
-        self.deconv_6 = Transpose1dLayer_multi_input(  int(model_size / 2) * 2, int(model_size / 5), 25, stride, upsample=upsample)
-        self.deconv_7 = Transpose1dLayer(  int(model_size / 5), num_channels, 25, stride, upsample=2)
+        self.deconv_5 = Transpose1dLayer_multi_input(model_size * 2, int(model_size / 2), 25, stride, upsample=2)
+        self.deconv_6 = Transpose1dLayer_multi_input(int(model_size / 2) * 2, int(model_size / 5), 25, stride, upsample=upsample)
+        self.deconv_7 = Transpose1dLayer(int(model_size / 5), num_channels, 25, stride, upsample=2)
 
-        #new convolutional layers
+        # new convolutional layers
         self.conv_1 = nn.Conv1d(num_channels, int(model_size / 5), 25, stride=2, padding=25 // 2)
-        self.conv_2 = nn.Conv1d(model_size // 5, model_size // 2, 25, stride=5, padding= 25 // 2)
-        self.conv_3 = nn.Conv1d(model_size // 2, model_size , 25, stride=2, padding= 25 // 2)
-        self.conv_4 = nn.Conv1d(model_size, model_size * 3 , 25, stride=5, padding= 25 // 2)
-        self.conv_5 = nn.Conv1d(model_size * 3, model_size * 5 , 25, stride=5, padding= 25 // 2)
-        self.conv_6 = nn.Conv1d(model_size * 5, model_size * 5 , 25, stride=5, padding= 25 // 2)
+        self.conv_2 = nn.Conv1d(model_size // 5, model_size // 2, 25, stride=5, padding=25 // 2)
+        self.conv_3 = nn.Conv1d(model_size // 2, model_size, 25, stride=2, padding=25 // 2)
+        self.conv_4 = nn.Conv1d(model_size, model_size * 3, 25, stride=5, padding=25 // 2)
+        self.conv_5 = nn.Conv1d(model_size * 3, model_size * 5, 25, stride=5, padding=25 // 2)
+        self.conv_6 = nn.Conv1d(model_size * 5, model_size * 5, 25, stride=5, padding=25 // 2)
 
         if post_proc_filt_len:
             self.ppfilter1 = nn.Conv1d(num_channels, num_channels, post_proc_filt_len)
 
         for m in self.modules():
             if isinstance(m, nn.ConvTranspose1d) or isinstance(m, nn.Linear):
-                nn.init.kaiming_normal(m.weight.data)
+                nn.init.kaiming_normal_(m.weight.data)
 
     def forward(self, x):
 
-        #print("x shape:", x.shape)
-        conv_1_out = F.leaky_relu(self.conv_1(x)) # x = (bs, 8, 5000)
+        # print("x shape:", x.shape)
+        conv_1_out = F.leaky_relu(self.conv_1(x))  # x = (bs, 8, 5000)
        # print("conv_1_out shape:", conv_1_out.shape)
         conv_2_out = F.leaky_relu(self.conv_2(conv_1_out))
        # print("conv_2_out shape:", conv_2_out.shape)
@@ -98,13 +99,11 @@ class Pulse2pulseGenerator(nn.Module):
         conv_5_out = F.leaky_relu(self.conv_5(conv_4_out))
        # print("conv_5_out shape:", conv_5_out.shape)
         x = F.leaky_relu(self.conv_6(conv_5_out))
-        #print("last x shape:", x.shape)
+        # print("last x shape:", x.shape)
 
-
-  
-        #x = self.fc1(x).view(-1, 5*self.model_size, 2) #x = self.fc1(x).view(-1, 16 * self.model_size, 16)
-        #x = F.relu(x)
-        #if self.verbose:
+        # x = self.fc1(x).view(-1, 5*self.model_size, 2) #x = self.fc1(x).view(-1, 16 * self.model_size, 16)
+        # x = F.relu(x)
+        # if self.verbose:
         #    print(x.shape)
 
         x = F.relu(self.deconv_1(x))
@@ -122,7 +121,7 @@ class Pulse2pulseGenerator(nn.Module):
         x = F.relu(self.deconv_5(x, conv_3_out))
         if self.verbose:
             print(x.shape)
-        
+
         x = F.relu(self.deconv_6(x, conv_2_out))
         if self.verbose:
             print(x.shape)
@@ -141,6 +140,7 @@ class PhaseShuffle(nn.Module):
     necessary.
     """
     # Copied from https://github.com/jtcramer/wavegan/blob/master/wavegan.py#L8
+
     def __init__(self, shift_factor):
         super(PhaseShuffle, self).__init__()
         self.shift_factor = shift_factor
@@ -172,7 +172,7 @@ class PhaseShuffle(nn.Module):
                 x_shuffle[idxs] = F.pad(x[idxs][..., -k:], (0, -k), mode='reflect')
 
         assert x_shuffle.shape == x.shape, "{}, {}".format(x_shuffle.shape,
-                                                       x.shape)
+                                                           x.shape)
         return x_shuffle
 
 
@@ -195,7 +195,7 @@ class Pulse2pulseDiscriminator(nn.Module):
         self.alpha = alpha
         self.verbose = verbose
 
-        self.conv1 = nn.Conv1d(num_channels,  model_size, 25, stride=2, padding=11)
+        self.conv1 = nn.Conv1d(num_channels, model_size, 25, stride=2, padding=11)
         self.conv2 = nn.Conv1d(model_size, 2 * model_size, 25, stride=2, padding=11)
         self.conv3 = nn.Conv1d(2 * model_size, 5 * model_size, 25, stride=2, padding=11)
         self.conv4 = nn.Conv1d(5 * model_size, 10 * model_size, 25, stride=2, padding=11)
@@ -214,7 +214,7 @@ class Pulse2pulseDiscriminator(nn.Module):
 
         for m in self.modules():
             if isinstance(m, nn.Conv1d) or isinstance(m, nn.Linear):
-                nn.init.kaiming_normal(m.weight.data)
+                nn.init.kaiming_normal_(m.weight.data)
 
     def forward(self, x):
         x = F.leaky_relu(self.conv1(x), negative_slope=self.alpha)
@@ -250,7 +250,7 @@ class Pulse2pulseDiscriminator(nn.Module):
         x = F.leaky_relu(self.conv7(x), negative_slope=self.alpha)
         if self.verbose:
             print(x.shape)
-        #print("x shape:", x.shape)
+        # print("x shape:", x.shape)
         x = x.view(-1, x.shape[1] * x.shape[2])
         if self.verbose:
             print(x.shape)

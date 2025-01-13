@@ -4,8 +4,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="deepfake-ecg", # Replace with your own username
-    version="1.1.2",
+    name="deepfake-ecg",  # Replace with your own username
+    version="1.1.3",
     author="Vajira Thambawita",
     author_email="vlbthambawita@gmail.com",
     description="Unlimited 10-sec 8-leads Deep Fake ECG generator.",
@@ -25,5 +25,9 @@ setuptools.setup(
         'numpy',
         'tqdm',
         'pandas',
-  ],
+        'torch',
+    ],
+    extras_require={
+        'examples': ['matplotlib'],
+    },
 )
