@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepfake-ecg"
+version = "1.1.3"
+description = "Unlimited 10-sec 8-leads Deep Fake ECG generator."
+readme = "README.md"
+authors = [
+    { name = "Vajira Thambawita", email = "vlbthambawita@gmail.com" }
+]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+requires-python = ">=3.7"
+dependencies = [
+    "numpy",
+    "tqdm",
+    "pandas",
+    "torch"
+]
+
+[project.optional-dependencies]
+examples = ["matplotlib"]
+
+[tool.setuptools.packages.find]
+include = ["deepfakeecg", "deepfakeecg.*"]
+
+[tool.setuptools.package-data]
+deepfakeecg = ["checkpoints/g_stat.pt"]
