@@ -57,7 +57,16 @@ lead aVL value = lead I value - 0.5 * lead II value
 lead aVF value = lead II value - 0.5 * lead I value
 ```
 
-### **Run on CPU (default setting)**
+### **Run (default setting)**
+
+Run on GPU, if availble, else on CPU:
+```python
+import deepfakeecg
+
+deepfakeecg.generate(5, ".", start_id=0)  # Generate 5 ECGs to the current folder starting from id=0
+```
+
+### **Run on CPU**
 
 ```python
 import deepfakeecg
