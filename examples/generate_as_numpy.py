@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
+
 import matplotlib.pyplot as plt
 import deepfakeecg
 import numpy as np
 
 # Generate a single ECG sample
-ecg_data = deepfakeecg.generate_as_numpy(run_device="cpu")
+ecg_data = deepfakeecg.generate_as_numpy()
 
 # Plot the first lead (Lead I)
 plt.figure(figsize=(15, 3))

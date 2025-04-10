@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from deepfakeecg import generate
 import os
 
@@ -9,8 +11,7 @@ os.makedirs(output_dir, exist_ok=True)
 generate(
     num_of_sample=5,
     out_dir=output_dir,
-    start_id=0,
-    run_device="cpu"
+    start_id=0
 )
 
 print(f"Generated 5 ECG samples in {output_dir}")
