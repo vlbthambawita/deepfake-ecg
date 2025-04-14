@@ -85,12 +85,9 @@ https://osf.io/6hved/
   1. 150k dataset - Randomly generated 150k DeepFake ECGs
   2. Filtered all normals dataset - Only "Normal" ECGs filtered using the MUSE analysis report
 
-## **A real ECG vs a DeepFake ECG (from left to right):**
-
-![GitHub Logo](samples/real_vs_fake_left_to_right_v2.png)
 
 ## **A sample DeepFake ECG:**
-![GitHub Logo](samples/2879.png)
+[A Sample ECG generator in HuggingFace]([samples/2879.png](https://huggingface.co/spaces/deepsynthbody/deepfake-ecg-generator))
 
 ## **Contributing**
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
