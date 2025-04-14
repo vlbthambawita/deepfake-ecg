@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import Union, Literal
 
 
-def generate(num_of_sample: int, out_dir: Union[str, Path], start_id: int = 0, run_device: Literal["cpu", "cuda"] = "cpu") -> None:
+def generate(num_of_sample: int, out_dir: Union[str, Path], start_id: int = 0,
+             run_device: Literal["cpu", "cuda"] = "cuda" if torch.cuda.is_available() else "cpu") -> None:
     """Generate multiple 8-lead ECG waveforms and save them as ASCII files
 
     Args:
@@ -48,7 +49,7 @@ def generate(num_of_sample: int, out_dir: Union[str, Path], start_id: int = 0, r
         # asc_file.close()
 
 
-def generate_as_numpy(run_device="cpu"):
+def generate_as_numpy(run_device: Literal["cpu", "cuda"] = "cuda" if torch.cuda.is_available() else "cpu"):
     """Generate a single 8-lead ECG waveform using deepfakeecg model
 
     Args:
