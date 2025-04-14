@@ -31,23 +31,28 @@ git clone https://github.com/vlbthambawita/deepfake-ecg.git
 cd deepfake-ecg
 ```
 
-#### **2. Install Dependencies**
+#### **2. Install Dependencies and the Package**
 
+##### **Without venv:** #####
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
-#### **3. Install the Package Locally**
-
+##### **In a venv:** #####
+With venv (to be stored e.g. under ~/python-environments/deepfake-ecg):
 ```bash
-pip install .
+mkdir -p ~/python-environments/deepfake-ecg
+python3 -m venv ~/python-environments/deepfake-ecg
+. ~/python-environments/deepfake-ecg/bin/activate
+pip install -e .
 ```
+
 
 ---
 
 ## Usage
 
-The generator functions can generate DeepFake ECGs with 8-lead values  
+The generator functions can generate DeepFake ECGs with 8-lead values
 [Lead names from the first column to the eighth column: **'I','II','V1','V2','V3','V4','V5','V6'**] for 10s (5000 values per lead). These 8-lead formats can be converted to 12-lead formats using the following equations:
 
 ```
@@ -73,7 +78,7 @@ import deepfakeecg
 deepfakeecg.generate(5, ".", start_id=0, run_device="cuda")  # Generate 5 ECGs to the current folder starting from id=0
 ```
 
-### **Pre-generated DeepFake ECGs and corresponding MUSE reports are here:**  
+### **Pre-generated DeepFake ECGs and corresponding MUSE reports are here:**
 https://osf.io/6hved/
 
 - In this repository, there are two DeepFake datasets:
