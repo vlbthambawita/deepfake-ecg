@@ -42,21 +42,22 @@ import torch
 
 # ###### Print usage and exit ###############################################
 def usage(exitCode = 0):
-   sys.stdout.write('Usage: ' + sys.argv[0] + ' [-t|--type ECG8|ECG12] [-f|--format numpy|ascii|csv|pdf] [-o|--output filename_pattern] [-s|--start-id number] [-e|--leads {I,II,III,aVL,aVR,aVF,V1,V2,V3,V4,V5,V6}] [-d|--device cpu|cuda] [-v|--version]\n')
+   sys.stdout.write('Usage: ' + sys.argv[0] + ' [-t|--type ECG8|ECG12] [-f|--format numpy|ascii|csv|pdf] [-o|--output filename_pattern] [-n|--number number] [-s|--start-id number] [-a|--scalefactor factor] [-e|--leads {I,II,III,aVL,aVR,aVF,V1,V2,V3,V4,V5,V6}] [-d|--device cpu|cuda] [-v|--version]\n')
    sys.exit(exitCode)
 
 
 # ###### Main program #######################################################
 
 # ====== Set defaults =======================================================
-ecgType           = deepfakeecg.DATA_ECG8
-ecgLength         = 10
-ecgNumber         = 1
-outputFilePattern = None
-outputFormat      = deepfakeecg.OUTPUT_CSV
-outputStartID     = 0
-outputLeads       = [ 'I' ]
-runOnDevice       = "cuda" if torch.cuda.is_available() else "cpu"
+ecgType            = deepfakeecg.DATA_ECG8
+ecgLengthInSeconds = 10
+ecgScaleFactor     = deepfakeecg.ECG_DEFAULT_SCALE_FACTOR
+numberOfECGs       = 1
+outputFilePattern  = None
+outputFormat       = deepfakeecg.OUTPUT_CSV
+outputStartID      = 0
+outputLeads        = [ 'I' ]
+runOnDevice        = "cuda" if torch.cuda.is_available() else "cpu"
 
 # ====== Handle arguments ===================================================
 try:
@@ -76,8 +77,8 @@ try:
    for option, optarg in options:
       if option in ( '-n', '--number' ):
          try:
-            ecgNumber = int(optarg)
-            if ecgNumber < 1:
+            numberOfECGs = int(optarg)
+            if numberOfECGs < 1:
                raise Exception()
          except:
             sys.stderr.write('ERROR: Invalid ECG number ' + optarg + '!\n')
@@ -92,12 +93,14 @@ try:
             sys.exit(1)
       elif option in ( '-l', '--length' ):
          try:
-            ecgLength = int(optarg)
-            if ecgLength < 1:
+            ecgLengthInSeconds = int(optarg)
+            if ecgLengthInSeconds < 1:
                raise Exception()
          except:
             sys.stderr.write('ERROR: Invalid ECG length ' + optarg + '!\n')
             sys.exit(1)
+      elif option in ( '-a', '--scalefactor' ):
+         ecgScaleFactor = float(optarg)
       elif option in ( '-o', '--output' ):
          outputFilePattern = optarg
       elif option in ( '-f', '--format' ):
@@ -149,7 +152,8 @@ if outputFilePattern == None:
       outputFilePattern = 'ecg-{number}.asc'
 
 # ====== Generate ECGs ======================================================
-results = deepfakeecg.generateDeepfakeECGs(ecgNumber, ecgType, ecgLength,
+results = deepfakeecg.generateDeepfakeECGs(numberOfECGs, ecgType,
+                                           ecgLengthInSeconds, ecgScaleFactor,
                                            outputFormat, outputFilePattern,
                                            outputStartID, outputLeads,
                                            runOnDevice)
