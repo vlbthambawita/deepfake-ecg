@@ -81,7 +81,8 @@ ECG_LEADS = {
 
 # ###### Produce ECG ASCII file from Tensor #################################
 def dataToASCII(ecgResult, outputFileName):
-   data = ecgResult.detach().cpu().numpy()
+   # Convert to NumPy, and remove the Timestamp column (0):
+   data = ecgResult.detach().cpu().numpy()[1:]
    numpy.savetxt(outputFileName, data, fmt = '%i')
 
 
@@ -105,11 +106,14 @@ def dataToCSV(ecgResult, ecgType, outputFileName):
 
 
 # ###### Produce ECG PDF file from Tensor ###################################
-def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName):
+def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName, idNumber = None):
 
-   data = ecgResult.detach().cpu().numpy()
+   data  = ecgResult.detach().cpu().numpy()
+   title = 'Generated ECG'
+   if idNumber != None:
+      title = title + ' — ID ' + str(idNumber)
 
-   matplotlib.pyplot.figure(figsize=(15, 3))
+   matplotlib.pyplot.figure(figsize=(15, 4))
    for outputLead in outputLeads:
       try:
          outputLeadIndex = ECG_LEADS[outputLead][0]
@@ -121,7 +125,7 @@ def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName):
          raise Exception('Invalid lead ' + outputLead + ' for this ECG type!')
       matplotlib.pyplot.plot(data[:, outputLeadIndex], label = outputLeadLabel)
    matplotlib.pyplot.legend()
-   matplotlib.pyplot.title('Generated ECG — ID ' + str(i))
+   matplotlib.pyplot.title(title)
    matplotlib.pyplot.xlabel('Time [s]')
    matplotlib.pyplot.ylabel('Amplitude [μV]')
    matplotlib.pyplot.grid(True)
@@ -237,11 +241,10 @@ def generateDeepfakeECGs(numberOfECGs:       int = 1,
                                    ) , 1 )
 
       # ------ Add time stamp for CSV output --------------------------------
-      if not outputFormat == OUTPUT_ASC:
-         # Combine time stamp with generated ECG samples.
-         # Now, shape is [ecgLengthInSamples, 1+8].
-         generatedECG = torch.cat( ( timeStamp, generatedECG ), 1 )
-         # print(generatedECG[:,0])
+      # Combine time stamp with generated ECG samples.
+      # Now, shape is [ecgLengthInSamples, 1+8].
+      generatedECG = torch.cat( ( timeStamp, generatedECG ), 1 )
+      # print(generatedECG[:,0])
 
       # ------ Write output file --------------------------------------------
       if outputFormat in [ OUTPUT_ASC, OUTPUT_CSV, OUTPUT_PDF ]:
@@ -261,7 +264,7 @@ def generateDeepfakeECGs(numberOfECGs:       int = 1,
 
       # ------ Collect data in array ----------------------------------------
       elif outputFormat == OUTPUT_TENSOR:
-         results.append(data)
+         results.append(generatedECG)
 
       # ------ Collect data in array ----------------------------------------
       elif outputFormat == OUTPUT_NUMPY:
@@ -288,9 +291,12 @@ def generate(num_of_sample: int,
       Each file contains ECG data in ASCII format with shape (5000, 8) for leads [I, II, V1, V2, V3, V4, V5, V6]
     """
 
-   generateDeepfakeECGs(num_of_sample, DATA_ECG8,
-                        int(5000 / ECG_SAMPLING_RATE), OUTPUT_ASC,
-                        os.path.join(out_dir, '{number}.asc'), 0)
+   generateDeepfakeECGs(num_of_sample,
+                        ecgType            = DATA_ECG8,
+                        ecgLengthInSeconds = int(5000 / ECG_SAMPLING_RATE),
+                        outputFormat       = OUTPUT_ASC,
+                        outputFilePattern  = os.path.join(out_dir, '{number}.asc'),
+                        outputStartID      = 0)
 
 
 # ###### Generate Deepfake ECG as NumPy object ##############################
@@ -304,7 +310,8 @@ def generate_as_numpy(runOnDevice: typing.Literal['cpu', 'cuda'] = 'cuda' if tor
        numpy.ndarray: Array of shape (5000, 8) containing the ECG data for leads [I, II, V1, V2, V3, V4, V5, V6]
     """
 
-   results = generateDeepfakeECGs(1, DATA_ECG8,
-                                  int(5000 / ECG_SAMPLING_RATE),
-                                  OUTPUT_NUMPY)
+   results = generateDeepfakeECGs(1,
+                                  ecgType            = DATA_ECG8,
+                                  ecgLengthInSeconds = int(5000 / ECG_SAMPLING_RATE),
+                                  outputFormat       = OUTPUT_NUMPY)
    return results[0]
