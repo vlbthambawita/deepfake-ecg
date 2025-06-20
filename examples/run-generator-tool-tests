@@ -1,0 +1,16 @@
+#!/bin/bash
+
+NUMBER_OF_ECGS=10
+for type in ECG8 ECG12 ; do   # ECG8 ECG12
+   for format in ascii csv pdf ; do
+      extension="unknown"
+      if [ "${format}" == "ascii" ] ; then
+         extension="asc"
+      elif [ "${format}" == "csv" ] ; then
+         extension="csv"
+      elif [ "${format}" == "pdf" ] ; then
+         extension="pdf"
+      fi
+      ./generator-tool -t "${type}" -o "${type}-{number}.${extension}" -s 0 -n "${NUMBER_OF_ECGS}"
+   done
+done
