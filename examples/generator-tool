@@ -56,7 +56,7 @@ numberOfECGs       = 1
 outputFilePattern  = None
 outputFormat       = deepfakeecg.OUTPUT_CSV
 outputStartID      = 0
-outputLeads        = [ 'I' ]
+outputLeads        = None
 runOnDevice        = "cuda" if torch.cuda.is_available() else "cpu"
 
 # ====== Handle arguments ===================================================
@@ -151,9 +151,19 @@ if outputFilePattern == None:
    else:
       outputFilePattern = 'ecg-{number}.asc'
 
+if outputLeads == None:
+   if ecgType == deepfakeecg.DATA_ECG12:
+      outputLeads = [ 'I', 'II', 'III', 'aVL', 'aVR', 'aVF', 'V1', 'V2', 'V3', 'V4' , 'V5' , 'V6' ]
+   else:
+      outputLeads = [ 'I', 'II', 'V1', 'V2', 'V3', 'V4' , 'V5' , 'V6' ]
+
+
 # ====== Generate ECGs ======================================================
 results = deepfakeecg.generateDeepfakeECGs(numberOfECGs, ecgType,
-                                           ecgLengthInSeconds, ecgScaleFactor,
-                                           outputFormat, outputFilePattern,
-                                           outputStartID, outputLeads,
-                                           runOnDevice)
+                                           ecgLengthInSeconds = ecgLengthInSeconds,
+                                           ecgScaleFactor     = ecgScaleFactor,
+                                           outputFormat       = outputFormat,
+                                           outputFilePattern  = outputFilePattern,
+                                           outputStartID      = outputStartID,
+                                           outputLeads        = outputLeads,
+                                           runOnDevice        = runOnDevice)

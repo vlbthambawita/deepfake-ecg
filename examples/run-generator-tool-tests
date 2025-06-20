@@ -1,8 +1,39 @@
 #!/bin/bash
+# ==========================================================================
+#         ____                   __       _          _____ ____ ____
+#        |  _ \  ___  ___ _ __  / _| __ _| | _____  | ____/ ___/ ___|
+#        | | | |/ _ \/ _ \ '_ \| |_ / _` | |/ / _ \ |  _|| |  | |  _
+#        | |_| |  __/  __/ |_) |  _| (_| |   <  __/ | |__| |__| |_| |
+#        |____/ \___|\___| .__/|_|  \__,_|_|\_\___| |_____\____\____|
+#                        |_|
+#
+#                       --- Deepfake ECG Generator ---
+#                https://github.com/vlbthambawita/deepfake-ecg
+# ==========================================================================
+#
+# Command-Line Generator Tool
+# Copyright (C) 2025 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: Thomas Dreibholz <dreibh@simula.no>
+
+set -eu
 
 NUMBER_OF_ECGS=10
 for type in ECG8 ECG12 ; do   # ECG8 ECG12
-   for format in ascii csv pdf ; do
+   for format in ascii csv pdf ; do   # ascii csv pdf
       extension="unknown"
       if [ "${format}" == "ascii" ] ; then
          extension="asc"
@@ -11,6 +42,6 @@ for type in ECG8 ECG12 ; do   # ECG8 ECG12
       elif [ "${format}" == "pdf" ] ; then
          extension="pdf"
       fi
-      ./generator-tool -t "${type}" -o "${type}-{number}.${extension}" -s 0 -n "${NUMBER_OF_ECGS}"
+      ./generator-tool -t "${type}" -f "${format}" -o "${type}-{number:04d}.${extension}" -s 0 -n "${NUMBER_OF_ECGS}"
    done
 done
