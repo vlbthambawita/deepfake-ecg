@@ -35,6 +35,7 @@
 # * Turtle <erencemayez@gmail.com>
 # * Thomas Dreibholz <dreibh@simula.no>
 
+import ecg_plot
 import matplotlib
 import numpy
 import os
@@ -53,25 +54,25 @@ ECG_DEFAULT_LENGTH_IN_SECONDS = 10
 ECG_DEFAULT_SCALE_FACTOR      = 6000
 
 # ------ ECG types ----------------------------------------
-DATA_ECG8         = 8
-DATA_ECG12        = 12
+DATA_ECG8          = 8
+DATA_ECG12         = 12
 
 # ------ Output formats -----------------------------------
-OUTPUT_NUMPY      = 1
-OUTPUT_TENSOR     = 2
-OUTPUT_ASC        = 10
-OUTPUT_CSV        = 11
-OUTPUT_PDF        = 12
+OUTPUT_NUMPY       = 1
+OUTPUT_TENSOR      = 2
+OUTPUT_ASC         = 10
+OUTPUT_CSV         = 11
+OUTPUT_PDF         = 20
 
 ECG_LEADS = {
-   'I':   [  1, 'Lead I',   DATA_ECG8 ],
-   'II':  [  2, 'Lead II',  DATA_ECG8 ],
-   'V1':  [  3, 'V1',       DATA_ECG8 ],
-   'V2':  [  4, 'V2',       DATA_ECG8 ],
-   'V3':  [  5, 'V3',       DATA_ECG8 ],
-   'V4':  [  6, 'V4',       DATA_ECG8 ],
-   'V5':  [  7, 'V5',       DATA_ECG8 ],
-   'V6':  [  8, 'V6',       DATA_ECG8 ],
+   'I':   [  1, 'Lead I',   DATA_ECG8  ],
+   'II':  [  2, 'Lead II',  DATA_ECG8  ],
+   'V1':  [  3, 'V1',       DATA_ECG8  ],
+   'V2':  [  4, 'V2',       DATA_ECG8  ],
+   'V3':  [  5, 'V3',       DATA_ECG8  ],
+   'V4':  [  6, 'V4',       DATA_ECG8  ],
+   'V5':  [  7, 'V5',       DATA_ECG8  ],
+   'V6':  [  8, 'V6',       DATA_ECG8  ],
    'III': [  9, 'Lead III', DATA_ECG12 ],
    'aVL': [ 10, 'aVL',      DATA_ECG12 ],
    'aVR': [ 11, 'aVR',      DATA_ECG12 ],
@@ -105,32 +106,65 @@ def dataToCSV(ecgResult, ecgType, outputFileName):
                  fmt       = '%i')
 
 
+# # ###### Produce ECG PDF file from Tensor ###################################
+# def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName, idNumber = None):
+#
+#    data  = ecgResult.detach().cpu().numpy()
+#    title = 'Generated ECG'
+#    if idNumber != None:
+#       title = title + ' — ID ' + str(idNumber)
+#
+#    matplotlib.pyplot.figure(figsize=(15, 4))
+#    for outputLead in outputLeads:
+#       try:
+#          outputLeadIndex = ECG_LEADS[outputLead][0]
+#          outputLeadLabel = ECG_LEADS[outputLead][1]
+#          outputLeadType  = ECG_LEADS[outputLead][2]
+#       except:
+#          raise Exception('Invalid lead ' + outputLead + '!')
+#       if outputLeadType > ecgType:
+#          raise Exception('Invalid lead ' + outputLead + ' for this ECG type!')
+#       matplotlib.pyplot.plot(data[:, outputLeadIndex], label = outputLeadLabel)
+#    matplotlib.pyplot.legend()
+#    matplotlib.pyplot.title(title)
+#    matplotlib.pyplot.xlabel('Time [Samples]')
+#    matplotlib.pyplot.ylabel('Amplitude [μV]')
+#    matplotlib.pyplot.grid(True)
+#    matplotlib.pyplot.ylim(-1000, +1000)
+#    matplotlib.pyplot.savefig(outputFileName, format='pdf')
+
+
 # ###### Produce ECG PDF file from Tensor ###################################
 def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName, idNumber = None):
 
-   data  = ecgResult.detach().cpu().numpy()
-   title = 'Generated ECG'
-   if idNumber != None:
-      title = title + ' — ID ' + str(idNumber)
+   # 1. Convert to NumPy
+   # 2. Remove the Timestamp column (0)
+   # 3. Convert from µV to mV
+   data = ecgResult.t().detach().cpu().numpy()[1:] / 1000
+   # print(data)
 
-   matplotlib.pyplot.figure(figsize=(15, 4))
-   for outputLead in outputLeads:
-      try:
-         outputLeadIndex = ECG_LEADS[outputLead][0]
-         outputLeadLabel = ECG_LEADS[outputLead][1]
-         outputLeadType  = ECG_LEADS[outputLead][2]
-      except:
-         raise Exception('Invalid lead ' + outputLead + '!')
-      if outputLeadType > ecgType:
-         raise Exception('Invalid lead ' + outputLead + ' for this ECG type!')
-      matplotlib.pyplot.plot(data[:, outputLeadIndex], label = outputLeadLabel)
-   matplotlib.pyplot.legend()
-   matplotlib.pyplot.title(title)
-   matplotlib.pyplot.xlabel('Time [s]')
-   matplotlib.pyplot.ylabel('Amplitude [μV]')
-   matplotlib.pyplot.grid(True)
-   matplotlib.pyplot.ylim(-1000, +1000)
-   matplotlib.pyplot.savefig(outputFileName)
+   if idNumber != None:
+      titleExtension = ' — ID ' + str(idNumber)
+   else:
+      titleExtension = ''
+
+   # ------ ECG-12 -------------------------------------------------------
+   if ecgType == DATA_ECG12:
+      ecg_plot.plot(data,
+                     title       = 'ECG-12' + titleExtension,
+                     sample_rate = ECG_SAMPLING_RATE,
+                     lead_index  = [ 'I', 'II', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'III', 'aVR', 'aVL', 'aVF' ],
+                     lead_order  = [0, 1, 8, 9, 10, 11, 2, 3, 4, 5, 6, 7],
+                     show_grid   = True)
+   # ------ ECG-8 --------------------------------------------------------
+   else:
+      ecg_plot.plot(data,
+                     title       = 'ECG-8' + titleExtension,
+                     sample_rate = ECG_SAMPLING_RATE,
+                     lead_index  = [ 'I', 'II', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6' ],
+                     lead_order  = [0, 1, 2, 3, 4, 5, 6, 7],
+                     show_grid   = True)
+   matplotlib.pyplot.savefig(outputFileName, format='pdf')
 
 
 # ###### Generate Deepfake ECGs #############################################
