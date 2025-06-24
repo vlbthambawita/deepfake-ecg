@@ -35,6 +35,7 @@
 # * Turtle <erencemayez@gmail.com>
 # * Thomas Dreibholz <dreibh@simula.no>
 
+import ecg_plot
 import matplotlib
 import numpy
 import os
@@ -53,30 +54,117 @@ ECG_DEFAULT_LENGTH_IN_SECONDS = 10
 ECG_DEFAULT_SCALE_FACTOR      = 6000
 
 # ------ ECG types ----------------------------------------
-DATA_ECG8         = 8
-DATA_ECG12        = 12
+DATA_ECG8          = 8
+DATA_ECG12         = 12
 
 # ------ Output formats -----------------------------------
-OUTPUT_NUMPY      = 1
-OUTPUT_TENSOR     = 2
-OUTPUT_ASC        = 10
-OUTPUT_CSV        = 11
-OUTPUT_PDF        = 12
+OUTPUT_NUMPY       = 1
+OUTPUT_TENSOR      = 2
+OUTPUT_ASC         = 10
+OUTPUT_CSV         = 11
+OUTPUT_PDF         = 20
 
 ECG_LEADS = {
-   'I':   [  1, 'Lead I',   DATA_ECG8 ],
-   'II':  [  2, 'Lead II',  DATA_ECG8 ],
-   'V1':  [  3, 'V1',       DATA_ECG8 ],
-   'V2':  [  4, 'V2',       DATA_ECG8 ],
-   'V3':  [  5, 'V3',       DATA_ECG8 ],
-   'V4':  [  6, 'V4',       DATA_ECG8 ],
-   'V5':  [  7, 'V5',       DATA_ECG8 ],
-   'V6':  [  8, 'V6',       DATA_ECG8 ],
+   'I':   [  1, 'Lead I',   DATA_ECG8  ],
+   'II':  [  2, 'Lead II',  DATA_ECG8  ],
+   'V1':  [  3, 'V1',       DATA_ECG8  ],
+   'V2':  [  4, 'V2',       DATA_ECG8  ],
+   'V3':  [  5, 'V3',       DATA_ECG8  ],
+   'V4':  [  6, 'V4',       DATA_ECG8  ],
+   'V5':  [  7, 'V5',       DATA_ECG8  ],
+   'V6':  [  8, 'V6',       DATA_ECG8  ],
    'III': [  9, 'Lead III', DATA_ECG12 ],
    'aVL': [ 10, 'aVL',      DATA_ECG12 ],
    'aVR': [ 11, 'aVR',      DATA_ECG12 ],
    'aVF': [ 12, 'aVF',      DATA_ECG12 ]
 }
+
+
+# ###### Produce ECG ASCII file from Tensor #################################
+def dataToASCII(ecgResult, outputFileName):
+   # Convert to NumPy, and remove the Timestamp column (0):
+   data = ecgResult.detach().cpu().numpy()[1:]
+   numpy.savetxt(outputFileName, data, fmt = '%i')
+
+
+# ###### Produce ECG CSV file from Tensor ###################################
+def dataToCSV(ecgResult, ecgType, outputFileName):
+
+   data = ecgResult.detach().cpu().numpy()
+
+   if ecgType == DATA_ECG8:
+      header = 'Timestamp,LeadI,LeadII,V1,V2,V3,V4,V5,V6'
+   elif ecgType == DATA_ECG12:
+      header = 'Timestamp,LeadI,LeadII,V1,V2,V3,V4,V5,V6,LeadIII,aVL,aVR,aVF'
+   else:
+      raise Exception('Invalid ECG type!')
+
+   numpy.savetxt(outputFileName, data,
+                 header    = header,
+                 comments  = '',
+                 delimiter = ',',
+                 fmt       = '%i')
+
+
+# # ###### Produce ECG PDF file from Tensor ###################################
+# def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName, idNumber = None):
+#
+#    data  = ecgResult.detach().cpu().numpy()
+#    title = 'Generated ECG'
+#    if idNumber != None:
+#       title = title + ' — ID ' + str(idNumber)
+#
+#    matplotlib.pyplot.figure(figsize=(15, 4))
+#    for outputLead in outputLeads:
+#       try:
+#          outputLeadIndex = ECG_LEADS[outputLead][0]
+#          outputLeadLabel = ECG_LEADS[outputLead][1]
+#          outputLeadType  = ECG_LEADS[outputLead][2]
+#       except:
+#          raise Exception('Invalid lead ' + outputLead + '!')
+#       if outputLeadType > ecgType:
+#          raise Exception('Invalid lead ' + outputLead + ' for this ECG type!')
+#       matplotlib.pyplot.plot(data[:, outputLeadIndex], label = outputLeadLabel)
+#    matplotlib.pyplot.legend()
+#    matplotlib.pyplot.title(title)
+#    matplotlib.pyplot.xlabel('Time [Samples]')
+#    matplotlib.pyplot.ylabel('Amplitude [μV]')
+#    matplotlib.pyplot.grid(True)
+#    matplotlib.pyplot.ylim(-1000, +1000)
+#    matplotlib.pyplot.savefig(outputFileName, format='pdf')
+
+
+# ###### Produce ECG PDF file from Tensor ###################################
+def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName, idNumber = None):
+
+   # 1. Convert to NumPy
+   # 2. Remove the Timestamp column (0)
+   # 3. Convert from µV to mV
+   data = ecgResult.t().detach().cpu().numpy()[1:] / 1000
+   # print(data)
+
+   if idNumber != None:
+      titleExtension = ' — ID ' + str(idNumber)
+   else:
+      titleExtension = ''
+
+   # ------ ECG-12 -------------------------------------------------------
+   if ecgType == DATA_ECG12:
+      ecg_plot.plot(data,
+                     title       = 'ECG-12' + titleExtension,
+                     sample_rate = ECG_SAMPLING_RATE,
+                     lead_index  = [ 'I', 'II', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'III', 'aVR', 'aVL', 'aVF' ],
+                     lead_order  = [0, 1, 8, 9, 10, 11, 2, 3, 4, 5, 6, 7],
+                     show_grid   = True)
+   # ------ ECG-8 --------------------------------------------------------
+   else:
+      ecg_plot.plot(data,
+                     title       = 'ECG-8' + titleExtension,
+                     sample_rate = ECG_SAMPLING_RATE,
+                     lead_index  = [ 'I', 'II', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6' ],
+                     lead_order  = [0, 1, 2, 3, 4, 5, 6, 7],
+                     show_grid   = True)
+   matplotlib.pyplot.savefig(outputFileName, format='pdf')
 
 
 # ###### Generate Deepfake ECGs #############################################
@@ -141,6 +229,7 @@ def generateDeepfakeECGs(numberOfECGs:       int = 1,
 
    # ====== Generate ECGs ===================================================
    results  = [ ]
+
    ecgRange = range(outputStartID, outputStartID + numberOfECGs)
    if showProgress:
       ecgRange = tqdm.tqdm(ecgRange)
@@ -186,17 +275,10 @@ def generateDeepfakeECGs(numberOfECGs:       int = 1,
                                    ) , 1 )
 
       # ------ Add time stamp for CSV output --------------------------------
-      if not outputFormat in [ OUTPUT_ASC, OUTPUT_NUMPY, OUTPUT_TENSOR ]:
-         # Combine time stamp with generated ECG samples.
-         # Now, shape is [ecgLengthInSamples, 1+8].
-         generatedECG = torch.cat( ( timeStamp, generatedECG ), 1 )
-         # print(generatedECG[:,0])
-
-      # ------ Make NumPy data ----------------------------------------------
-      if outputFormat == OUTPUT_TENSOR:
-         data = generatedECG
-      else:
-         data = generatedECG.detach().cpu().numpy()
+      # Combine time stamp with generated ECG samples.
+      # Now, shape is [ecgLengthInSamples, 1+8].
+      generatedECG = torch.cat( ( timeStamp, generatedECG ), 1 )
+      # print(generatedECG[:,0])
 
       # ------ Write output file --------------------------------------------
       if outputFormat in [ OUTPUT_ASC, OUTPUT_CSV, OUTPUT_PDF ]:
@@ -204,46 +286,23 @@ def generateDeepfakeECGs(numberOfECGs:       int = 1,
 
         # ------ ASCII text -------------------------------------------------
         if outputFormat == OUTPUT_ASC:
-           numpy.savetxt(outputFileName, data, fmt = '%i')
+           dataToASCII(generatedECG, outputFileName)
 
         # ------ CSV --------------------------------------------------------
         elif outputFormat == OUTPUT_CSV:
-           if ecgType == DATA_ECG8:
-              header = 'Timestamp,LeadI,LeadII,V1,V2,V3,V4,V5,V6'
-           elif ecgType == DATA_ECG12:
-              header = 'Timestamp,LeadI,LeadII,V1,V2,V3,V4,V5,V6,LeadIII,aVL,aVR,aVF'
-           else:
-              raise Exception('Invalid ECG type!')
-           numpy.savetxt(outputFileName, data,
-                         header    = header,
-                         comments  = '',
-                         delimiter = ',',
-                         fmt       = '%i')
+           dataToCSV(generatedECG, ecgType, outputFileName)
 
         # ------ PDF --------------------------------------------------------
         elif outputFormat == OUTPUT_PDF:
-           matplotlib.pyplot.figure(figsize=(15, 3))
-           for outputLead in outputLeads:
-              try:
-                 outputLeadIndex = ECG_LEADS[outputLead][0]
-                 outputLeadLabel = ECG_LEADS[outputLead][1]
-                 outputLeadType  = ECG_LEADS[outputLead][2]
-              except:
-                  raise Exception('Invalid lead ' + outputLead + '!')
-              if outputLeadType > ecgType:
-                  raise Exception('Invalid lead ' + outputLead + ' for this ECG type!')
-              matplotlib.pyplot.plot(data[:, outputLeadIndex], label = outputLeadLabel)
-           matplotlib.pyplot.legend()
-           matplotlib.pyplot.title('Generated ECG — ID ' + str(i))
-           matplotlib.pyplot.xlabel('Time [s]')
-           matplotlib.pyplot.ylabel('Amplitude [μV]')
-           matplotlib.pyplot.grid(True)
-           matplotlib.pyplot.ylim(-1000, +1000)
-           matplotlib.pyplot.savefig(outputFileName)
+           dataToPDF(generatedECG, ecgType, outputLeads, outputFileName)
 
       # ------ Collect data in array ----------------------------------------
-      else:
-         results.append(data)
+      elif outputFormat == OUTPUT_TENSOR:
+         results.append(generatedECG)
+
+      # ------ Collect data in array ----------------------------------------
+      elif outputFormat == OUTPUT_NUMPY:
+         results.append(generatedECG.detach().cpu().numpy())
 
    return results
 
@@ -266,9 +325,12 @@ def generate(num_of_sample: int,
       Each file contains ECG data in ASCII format with shape (5000, 8) for leads [I, II, V1, V2, V3, V4, V5, V6]
     """
 
-   generateDeepfakeECGs(num_of_sample, DATA_ECG8,
-                        int(5000 / ECG_SAMPLING_RATE), OUTPUT_ASC,
-                        os.path.join(out_dir, '{number}.asc'), 0)
+   generateDeepfakeECGs(num_of_sample,
+                        ecgType            = DATA_ECG8,
+                        ecgLengthInSeconds = int(5000 / ECG_SAMPLING_RATE),
+                        outputFormat       = OUTPUT_ASC,
+                        outputFilePattern  = os.path.join(out_dir, '{number}.asc'),
+                        outputStartID      = 0)
 
 
 # ###### Generate Deepfake ECG as NumPy object ##############################
@@ -282,7 +344,8 @@ def generate_as_numpy(runOnDevice: typing.Literal['cpu', 'cuda'] = 'cuda' if tor
        numpy.ndarray: Array of shape (5000, 8) containing the ECG data for leads [I, II, V1, V2, V3, V4, V5, V6]
     """
 
-   results = generateDeepfakeECGs(1, DATA_ECG8,
-                                  int(5000 / ECG_SAMPLING_RATE),
-                                  OUTPUT_NUMPY)
+   results = generateDeepfakeECGs(1,
+                                  ecgType            = DATA_ECG8,
+                                  ecgLengthInSeconds = int(5000 / ECG_SAMPLING_RATE),
+                                  outputFormat       = OUTPUT_NUMPY)
    return results[0]
