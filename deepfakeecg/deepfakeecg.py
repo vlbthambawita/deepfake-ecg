@@ -147,6 +147,7 @@ def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName, idNumber = None):
       titleExtension = ' — ID ' + str(idNumber)
    else:
       titleExtension = ''
+   titleExtension = titleExtension + ' — 25 mm/sec, 1 mV/10 mm'
 
    # ------ ECG-12 -------------------------------------------------------
    if ecgType == DATA_ECG12:
