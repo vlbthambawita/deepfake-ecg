@@ -184,7 +184,10 @@ def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName,
       signals, info = neurokit2.ecg_process(leadI, sampling_rate = ECG_SAMPLING_RATE)
       neurokit2.ecg_plot(signals, info)
 
-      matplotlib.pyplot.gcf().set_size_inches(11.7, 8.27, forward=True)
+      # DIN A4 landscape: w=11.7, h=8.27
+      w = 508/25.4   # mm to inch
+      h = 122/25.4   # mm to inch
+      matplotlib.pyplot.gcf().set_size_inches(w, h, forward=True)
       pdf.savefig(matplotlib.pyplot.gcf())
       matplotlib.pyplot.close()
 
