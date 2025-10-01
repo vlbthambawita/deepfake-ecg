@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "deepfake-ecg"
-version = "1.3.1"
+version = "1.4.0"
 description = "Configurable Deep Fake ECG generator."
 readme = "README.md"
 authors = [
@@ -22,6 +22,7 @@ dependencies = [
     "ecg-plot",
     "numpy",
     "matplotlib",
+    "neurokit2",
     "tqdm",
     "pandas",
     "torch"

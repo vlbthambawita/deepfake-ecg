@@ -33,13 +33,15 @@ set -eu
 
 NUMBER_OF_ECGS=10
 for type in ECG8 ECG12 ; do   # ECG8 ECG12
-   for format in ascii csv pdf ; do   # ascii csv pdf
+   for format in ascii csv pdf pdf+analysis ; do   # ascii csv pdf
       extension="unknown"
       if [ "${format}" == "ascii" ] ; then
          extension="asc"
       elif [ "${format}" == "csv" ] ; then
          extension="csv"
       elif [ "${format}" == "pdf" ] ; then
+         extension="pdf"
+      elif [ "${format}" == "pdf+analysis" ] ; then
          extension="pdf"
       fi
       ./generator-tool -t "${type}" -f "${format}" -o "${type}-{number:04d}.${extension}" -s 0 -n "${NUMBER_OF_ECGS}"

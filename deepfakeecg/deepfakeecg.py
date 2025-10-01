@@ -37,6 +37,8 @@
 
 import ecg_plot
 import matplotlib
+import matplotlib.backends.backend_pdf
+import neurokit2
 import numpy
 import os
 import pathlib
@@ -54,15 +56,16 @@ ECG_DEFAULT_LENGTH_IN_SECONDS = 10
 ECG_DEFAULT_SCALE_FACTOR      = 6000
 
 # ------ ECG types ----------------------------------------
-DATA_ECG8          = 8
-DATA_ECG12         = 12
+DATA_ECG8           = 8
+DATA_ECG12          = 12
 
 # ------ Output formats -----------------------------------
-OUTPUT_NUMPY       = 1
-OUTPUT_TENSOR      = 2
-OUTPUT_ASC         = 10
-OUTPUT_CSV         = 11
-OUTPUT_PDF         = 20
+OUTPUT_NUMPY        = 1
+OUTPUT_TENSOR       = 2
+OUTPUT_ASC          = 10
+OUTPUT_CSV          = 11
+OUTPUT_PDF          = 20
+OUTPUT_PDF_ANALYSIS = 21
 
 ECG_LEADS = {
    'I':   [  1, 'Lead I',   DATA_ECG8  ],
@@ -135,7 +138,8 @@ def dataToCSV(ecgResult, ecgType, outputFileName):
 
 
 # ###### Produce ECG PDF file from Tensor ###################################
-def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName, idNumber = None):
+def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName,
+              outputFormat = OUTPUT_PDF, idNumber = None):
 
    # 1. Convert to NumPy
    # 2. Remove the Timestamp column (0)
@@ -149,23 +153,42 @@ def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName, idNumber = None):
       titleExtension = ''
    titleExtension = titleExtension + ' — 25 mm/sec, 1 mV/10 mm'
 
+   pdf = matplotlib.backends.backend_pdf.PdfPages(outputFileName)
+
    # ------ ECG-12 -------------------------------------------------------
    if ecgType == DATA_ECG12:
       ecg_plot.plot(data,
-                     title       = 'ECG-12' + titleExtension,
-                     sample_rate = ECG_SAMPLING_RATE,
-                     lead_index  = [ 'I', 'II', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'III', 'aVR', 'aVL', 'aVF' ],
-                     lead_order  = [0, 1, 8, 9, 10, 11, 2, 3, 4, 5, 6, 7],
-                     show_grid   = True)
+                    title       = 'ECG-12' + titleExtension,
+                    sample_rate = ECG_SAMPLING_RATE,
+                    lead_index  = [ 'I', 'II', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'III', 'aVR', 'aVL', 'aVF' ],
+                    lead_order  = [0, 1, 8, 9, 10, 11, 2, 3, 4, 5, 6, 7],
+                    show_grid   = True)
    # ------ ECG-8 --------------------------------------------------------
    else:
       ecg_plot.plot(data,
-                     title       = 'ECG-8' + titleExtension,
-                     sample_rate = ECG_SAMPLING_RATE,
-                     lead_index  = [ 'I', 'II', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6' ],
-                     lead_order  = [0, 1, 2, 3, 4, 5, 6, 7],
-                     show_grid   = True)
-   matplotlib.pyplot.savefig(outputFileName, format='pdf')
+                    title       = 'ECG-8' + titleExtension,
+                    sample_rate = ECG_SAMPLING_RATE,
+                    lead_index  = [ 'I', 'II', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6' ],
+                    lead_order  = [0, 1, 2, 3, 4, 5, 6, 7],
+                    show_grid   = True)
+
+   pdf.savefig(matplotlib.pyplot.gcf())
+   matplotlib.pyplot.close()
+
+   if outputFormat == OUTPUT_PDF_ANALYSIS:
+      leadI = data[0]
+
+      print(data[0])
+      print(len(data[0]))
+
+      signals, info = neurokit2.ecg_process(leadI, sampling_rate = ECG_SAMPLING_RATE)
+      neurokit2.ecg_plot(signals, info)
+
+      matplotlib.pyplot.gcf().set_size_inches(11.7, 8.27, forward=True)
+      pdf.savefig(matplotlib.pyplot.gcf())
+      matplotlib.pyplot.close()
+
+   pdf.close()
 
 
 # ###### Generate Deepfake ECGs #############################################
@@ -191,6 +214,7 @@ def generateDeepfakeECGs(numberOfECGs:       int = 1,
          OUTPUT_ASC: text, as in the original code
          OUTPUT_CSV: CSV, with additional column for time stamp in milliseconds
          OUTPUT_PDF: PDF, with plot of the output
+         OUTPUT_PDF_ANALYSIS: PDF, with plot of the output and NeuroKit2 analysis
       outputFilePattern: Pattern for naming output files, with format() placeholder 'number', e.g. 'ecg-{number:06d}.csv'
       outputStartID: Start ID for file numbering
       outputLeads: List of output leads for PDF plotting (from: [ 'I', 'II', 'III', 'aVL', 'aVR', 'aVF', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6' ])
@@ -282,7 +306,7 @@ def generateDeepfakeECGs(numberOfECGs:       int = 1,
       # print(generatedECG[:,0])
 
       # ------ Write output file --------------------------------------------
-      if outputFormat in [ OUTPUT_ASC, OUTPUT_CSV, OUTPUT_PDF ]:
+      if outputFormat in [ OUTPUT_ASC, OUTPUT_CSV, OUTPUT_PDF, OUTPUT_PDF_ANALYSIS ]:
         outputFileName = outputFilePattern.format(number = i)
 
         # ------ ASCII text -------------------------------------------------
@@ -294,8 +318,8 @@ def generateDeepfakeECGs(numberOfECGs:       int = 1,
            dataToCSV(generatedECG, ecgType, outputFileName)
 
         # ------ PDF --------------------------------------------------------
-        elif outputFormat == OUTPUT_PDF:
-           dataToPDF(generatedECG, ecgType, outputLeads, outputFileName)
+        elif ( (outputFormat == OUTPUT_PDF) or (outputFormat == OUTPUT_PDF_ANALYSIS) ):
+           dataToPDF(generatedECG, ecgType, outputLeads, outputFileName, outputFormat)
 
       # ------ Collect data in array ----------------------------------------
       elif outputFormat == OUTPUT_TENSOR:
