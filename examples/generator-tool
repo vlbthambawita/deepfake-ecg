@@ -42,7 +42,7 @@ import torch
 
 # ###### Print usage and exit ###############################################
 def usage(exitCode = 0):
-   sys.stdout.write('Usage: ' + sys.argv[0] + ' [-t|--type ECG8|ECG12] [-f|--format numpy|ascii|csv|pdf] [-o|--output filename_pattern] [-n|--number number] [-s|--start-id number] [-a|--scalefactor factor] [-e|--leads {I,II,III,aVL,aVR,aVF,V1,V2,V3,V4,V5,V6}] [-d|--device cpu|cuda] [-v|--version]\n')
+   sys.stdout.write('Usage: ' + sys.argv[0] + ' [-t|--type ECG8|ECG12] [-f|--format numpy|ascii|csv|pdf|pdf+analysis] [-o|--output filename_pattern] [-n|--number number] [-s|--start-id number] [-a|--scalefactor factor] [-e|--leads {I,II,III,aVL,aVR,aVF,V1,V2,V3,V4,V5,V6}] [-d|--device cpu|cuda] [-v|--version]\n')
    sys.exit(exitCode)
 
 
@@ -112,6 +112,8 @@ try:
             outputFormat = deepfakeecg.OUTPUT_CSV
          elif optarg == 'pdf':
             outputFormat = deepfakeecg.OUTPUT_PDF
+         elif optarg == 'pdf+analysis':
+            outputFormat = deepfakeecg.OUTPUT_PDF_ANALYSIS
          else:
             sys.stderr.write('ERROR: Invalid format ' + optarg + '!\n')
             sys.exit(1)
@@ -146,7 +148,8 @@ if len(args) > 0:
 if outputFilePattern == None:
    if outputFormat == deepfakeecg.OUTPUT_CSV:
       outputFilePattern = 'ecg-{number}.csv'
-   elif outputFormat == deepfakeecg.OUTPUT_PDF:
+   elif ( (outputFormat == deepfakeecg.OUTPUT_PDF) or
+          (outputFormat == deepfakeecg.OUTPUT_PDF_ANALYSIS) ):
       outputFilePattern = 'ecg-{number}.pdf'
    else:
       outputFilePattern = 'ecg-{number}.asc'
