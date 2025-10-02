@@ -106,34 +106,6 @@ def dataToCSV(ecgResult, ecgType, outputFileName):
                  fmt       = '%i')
 
 
-# # ###### Produce ECG PDF file from Tensor ###################################
-# def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName, idNumber = None):
-#
-#    data  = ecgResult.detach().cpu().numpy()
-#    title = 'Generated ECG'
-#    if idNumber != None:
-#       title = title + ' — ID ' + str(idNumber)
-#
-#    matplotlib.pyplot.figure(figsize=(15, 4))
-#    for outputLead in outputLeads:
-#       try:
-#          outputLeadIndex = ECG_LEADS[outputLead][0]
-#          outputLeadLabel = ECG_LEADS[outputLead][1]
-#          outputLeadType  = ECG_LEADS[outputLead][2]
-#       except:
-#          raise Exception('Invalid lead ' + outputLead + '!')
-#       if outputLeadType > ecgType:
-#          raise Exception('Invalid lead ' + outputLead + ' for this ECG type!')
-#       matplotlib.pyplot.plot(data[:, outputLeadIndex], label = outputLeadLabel)
-#    matplotlib.pyplot.legend()
-#    matplotlib.pyplot.title(title)
-#    matplotlib.pyplot.xlabel('Time [Samples]')
-#    matplotlib.pyplot.ylabel('Amplitude [μV]')
-#    matplotlib.pyplot.grid(True)
-#    matplotlib.pyplot.ylim(-1000, +1000)
-#    matplotlib.pyplot.savefig(outputFileName, format='pdf')
-
-
 # ###### Produce ECG PDF file from Tensor ###################################
 def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName, idNumber = None):
 
