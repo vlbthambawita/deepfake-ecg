@@ -150,9 +150,6 @@ def dataToPDF(ecgResult, ecgType, outputLeads, outputFileName,
    if outputFormat == OUTPUT_PDF_ANALYSIS:
       leadI = data[0]
 
-      print(data[0])
-      print(len(data[0]))
-
       signals, info = neurokit2.ecg_process(leadI, sampling_rate = ECG_SAMPLING_RATE)
       neurokit2.ecg_plot(signals, info)
 
