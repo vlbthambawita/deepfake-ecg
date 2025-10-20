@@ -41,7 +41,7 @@ import torch
 
 
 # ###### Print usage and exit ###############################################
-def usage(exitCode = 0):
+def usage(exitCode : int = 0) -> None:
    sys.stdout.write('Usage: ' + sys.argv[0] + ' [-t|--type ECG8|ECG12] [-f|--format numpy|ascii|csv|pdf|pdf+analysis] [-o|--output filename_pattern] [-n|--number number] [-s|--start-id number] [-a|--scalefactor factor] [-e|--leads {I,II,III,aVL,aVR,aVF,V1,V2,V3,V4,V5,V6}] [-d|--device cpu|cuda] [-v|--version]\n')
    sys.exit(exitCode)
 
