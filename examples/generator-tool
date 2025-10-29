@@ -61,7 +61,7 @@ runOnDevice        = "cuda" if torch.cuda.is_available() else "cpu"
 
 # ====== Handle arguments ===================================================
 try:
-   options, args = getopt.getopt(
+   options, args = getopt.gnu_getopt(
       sys.argv[1:],
       'n:t:l:f:o:s:e:d:v',
       [ 'number=',
