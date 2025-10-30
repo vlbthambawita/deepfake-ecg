@@ -1,0 +1,13 @@
+#!/bin/sh -eu
+
+SCRIPTS="
+   generator-tool
+   generate_as_numpy.py
+   generate_to_file.py
+   simple.py
+"
+
+for script in $SCRIPTS ; do
+   echo "$script:"
+   mypy --strict --ignore-missing-imports $script
+done
