@@ -217,8 +217,8 @@ def generateDeepfakeECGs(numberOfECGs:       int = 1,
 
    # ====== Make milliseconds time stamp tensor =============================
    ecgLengthInSamples = ecgLengthInSeconds * ECG_SAMPLING_RATE
-   timeStamp = torch.arange(0, ECG_SAMPLING_RATE * ecgLengthInSamples,
-                            ECG_SAMPLING_RATE,
+   timeStamp = torch.arange(0, 1000000 * ecgLengthInSeconds,
+                            1000000 / ECG_SAMPLING_RATE,
                             dtype = torch.int32, device = device)
    # Timestamp shape is [ ecgLengthInSamples ]
    timeStamp = torch.t(timeStamp.reshape(1, ecgLengthInSamples))
