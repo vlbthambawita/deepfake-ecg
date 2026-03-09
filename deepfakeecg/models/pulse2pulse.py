@@ -1,23 +1,35 @@
 # Modified version:Vajira Thambawita
 
+import numpy.typing
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data
 
+from typing import Any, Final, Optional, Tuple, Union
+
 
 class Transpose1dLayer(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding=11, upsample=None, output_padding=1):
+
+    def __init__(self,
+                 in_channels    : int,
+                 out_channels   : int,
+                 kernel_size    : int,
+                 stride         : int,
+                 padding        : int                                       = 11,
+                 upsample       : Optional[Union[float, Tuple[float, ...]]] = None,
+                 output_padding : int                                       = 1) -> None:
+
         super(Transpose1dLayer, self).__init__()
         self.upsample = upsample
 
-        self.upsample_layer = torch.nn.Upsample(scale_factor=upsample)
+        self.upsample_layer = torch.nn.Upsample(scale_factor = upsample)
         reflection_pad = kernel_size // 2
         self.reflection_pad = nn.ConstantPad1d(reflection_pad, value=0)
         self.conv1d = torch.nn.Conv1d(in_channels, out_channels, kernel_size, stride)
         self.Conv1dTrans = nn.ConvTranspose1d(in_channels, out_channels, kernel_size, stride, padding, output_padding)
 
-    def forward(self, x):
+    def forward(self, x : torch.Tensor) -> Any:
         if self.upsample:
             # x = torch.cat((x, in_feature), 1)
             return self.conv1d(self.reflection_pad(self.upsample_layer(x)))
@@ -26,7 +38,16 @@ class Transpose1dLayer(nn.Module):
 
 
 class Transpose1dLayer_multi_input(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding=11, upsample=None, output_padding=1):
+
+    def __init__(self,
+                 in_channels    : int,
+                 out_channels   : int,
+                 kernel_size    : int,
+                 stride         : int,
+                 padding        : int                                       = 11,
+                 upsample       : Optional[Union[float, Tuple[float, ...]]] = None,
+                 output_padding : int                                       = 1) -> None:
+
         super(Transpose1dLayer_multi_input, self).__init__()
         self.upsample = upsample
 
@@ -36,7 +57,7 @@ class Transpose1dLayer_multi_input(nn.Module):
         self.conv1d = torch.nn.Conv1d(in_channels, out_channels, kernel_size, stride)
         self.Conv1dTrans = nn.ConvTranspose1d(in_channels, out_channels, kernel_size, stride, padding, output_padding)
 
-    def forward(self, x, in_feature):
+    def forward(self, x : torch.Tensor, in_feature : torch.Tensor) -> Any:
         if self.upsample:
             x = torch.cat((x, in_feature), 1)
             return self.conv1d(self.reflection_pad(self.upsample_layer(x)))
@@ -45,22 +66,30 @@ class Transpose1dLayer_multi_input(nn.Module):
 
 
 class Pulse2pulseGenerator(nn.Module):
-    def __init__(self, model_size=50, ngpus=1, num_channels=8,
-                 latent_dim=100, post_proc_filt_len=512,
-                 verbose=False, upsample=True):
-        super(Pulse2pulseGenerator, self).__init__()
-        self.ngpus = ngpus
-        self.model_size = model_size  # d
-        self.num_channels = num_channels  # c
-        self.latent_di = latent_dim
-        self.post_proc_filt_len = post_proc_filt_len
-        self.verbose = verbose
-        # "Dense" is the same meaning as fully connection.
-        self.fc1 = nn.Linear(latent_dim, 10 * model_size)
 
-        stride = 4
-        if upsample:
-            stride = 1
+    def __init__(self,
+                 model_size         : int  = 50,
+                 ngpus              : int  = 1,
+                 num_channels       : int  = 8,
+                 latent_dim         : int  = 100,
+                 post_proc_filt_len : int  = 512,
+                 verbose            : bool = False,
+                 upsampleOn         : bool = True) -> None:
+
+        super(Pulse2pulseGenerator, self).__init__()
+        self.ngpus              : Final[int]  = ngpus
+        self.model_size         : Final[int]  = model_size  # d
+        self.num_channels       : Final[int]  = num_channels  # c
+        self.latent_di          : Final[int]  = latent_dim
+        self.post_proc_filt_len : Final[int]  = post_proc_filt_len
+        self.verbose            : Final[bool] = verbose
+        # "Dense" is the same meaning as fully connection.
+        self.fc1 : Final[nn.Linear] = nn.Linear(latent_dim, 10 * model_size)
+
+        stride   : int = 4
+        upsample : Optional[Union[float, Tuple[float, ...]]] = None
+        if upsampleOn:
+            stride   = 1
             upsample = 5
         self.deconv_1 = Transpose1dLayer(5 * model_size, 5 * model_size, 25, stride, upsample=upsample)
         self.deconv_2 = Transpose1dLayer_multi_input(5 * model_size * 2, 3 * model_size, 25, stride, upsample=upsample)
@@ -85,7 +114,7 @@ class Pulse2pulseGenerator(nn.Module):
             if isinstance(m, nn.ConvTranspose1d) or isinstance(m, nn.Linear):
                 nn.init.kaiming_normal_(m.weight.data)
 
-    def forward(self, x):
+    def forward(self, x : torch.Tensor) -> torch.Tensor:
 
         # print("x shape:", x.shape)
         conv_1_out = F.leaky_relu(self.conv_1(x))  # x = (bs, 8, 5000)
@@ -141,24 +170,26 @@ class PhaseShuffle(nn.Module):
     """
     # Copied from https://github.com/jtcramer/wavegan/blob/master/wavegan.py#L8
 
-    def __init__(self, shift_factor):
-        super(PhaseShuffle, self).__init__()
-        self.shift_factor = shift_factor
+    def __init__(self,  shift_factor : int):
 
-    def forward(self, x):
+        super(PhaseShuffle, self).__init__()
+        self.shift_factor : Final[int] = shift_factor
+
+    def forward(self, x : torch.Tensor) -> torch.Tensor:
+
         if self.shift_factor == 0:
             return x
         # uniform in (L, R)
-        k_list = torch.Tensor(x.shape[0]).random_(0, 2 * self.shift_factor + 1) - self.shift_factor
-        k_list = k_list.numpy().astype(int)
+        k_tensor_list : Final[torch.Tensor] = torch.Tensor(x.shape[0]).random_(0, 2 * self.shift_factor + 1) - self.shift_factor
+        k_list : Final[numpy.typing.NDArray[Any]]  = k_tensor_list.numpy().astype(int)
 
         # Combine sample indices into lists so that less shuffle operations
         # need to be performed
-        k_map = {}
+        k_map : dict[int, list[Any]] = { }
         for idx, k in enumerate(k_list):
             k = int(k)
             if k not in k_map:
-                k_map[k] = []
+                k_map[k] = [ ]
             k_map[k].append(idx)
 
         # Make a copy of x for our output
@@ -177,46 +208,55 @@ class PhaseShuffle(nn.Module):
 
 
 class PhaseRemove(nn.Module):
-    def __init__(self):
+
+    def __init__(self) -> None:
         super(PhaseRemove, self).__init__()
 
-    def forward(self, x):
+    def forward(self, x : torch.Tensor) -> None:
         pass
 
 
 class Pulse2pulseDiscriminator(nn.Module):
-    def __init__(self, model_size=64, ngpus=1, num_channels=8, shift_factor=2,
-                 alpha=0.2, verbose=False):
+
+    def __init__(self,
+                 model_size   : int   = 64,
+                 ngpus        : int   = 1,
+                 num_channels : int   = 8,
+                 shift_factor : int   = 2,
+                 alpha        : float = 0.2,
+                 verbose      : bool  = False) -> None:
+
         super(Pulse2pulseDiscriminator, self).__init__()
-        self.model_size = model_size  # d
-        self.ngpus = ngpus
-        self.num_channels = num_channels  # c
-        self.shift_factor = shift_factor  # n
-        self.alpha = alpha
-        self.verbose = verbose
+        self.model_size   : Final[int]   = model_size  # d
+        self.ngpus        : Final[int]   = ngpus
+        self.num_channels : Final[int]   = num_channels  # c
+        self.shift_factor : Final[int]   = shift_factor  # n
+        self.alpha        : Final[float] = alpha
+        self.verbose      : Final[bool]  = verbose
 
-        self.conv1 = nn.Conv1d(num_channels, model_size, 25, stride=2, padding=11)
-        self.conv2 = nn.Conv1d(model_size, 2 * model_size, 25, stride=2, padding=11)
-        self.conv3 = nn.Conv1d(2 * model_size, 5 * model_size, 25, stride=2, padding=11)
-        self.conv4 = nn.Conv1d(5 * model_size, 10 * model_size, 25, stride=2, padding=11)
-        self.conv5 = nn.Conv1d(10 * model_size, 20 * model_size, 25, stride=4, padding=11)
-        self.conv6 = nn.Conv1d(20 * model_size, 25 * model_size, 25, stride=4, padding=11)
-        self.conv7 = nn.Conv1d(25 * model_size, 100 * model_size, 25, stride=4, padding=11)
+        self.conv1 : Final[nn.Conv1d]  = nn.Conv1d(num_channels, model_size, 25, stride=2, padding=11)
+        self.conv2 : Final[nn.Conv1d]  = nn.Conv1d(model_size, 2 * model_size, 25, stride=2, padding=11)
+        self.conv3 : Final[nn.Conv1d]  = nn.Conv1d(2 * model_size, 5 * model_size, 25, stride=2, padding=11)
+        self.conv4 : Final[nn.Conv1d]  = nn.Conv1d(5 * model_size, 10 * model_size, 25, stride=2, padding=11)
+        self.conv5 : Final[nn.Conv1d]  = nn.Conv1d(10 * model_size, 20 * model_size, 25, stride=4, padding=11)
+        self.conv6 : Final[nn.Conv1d]  = nn.Conv1d(20 * model_size, 25 * model_size, 25, stride=4, padding=11)
+        self.conv7 : Final[nn.Conv1d]  = nn.Conv1d(25 * model_size, 100 * model_size, 25, stride=4, padding=11)
 
-        self.ps1 = PhaseShuffle(shift_factor)
-        self.ps2 = PhaseShuffle(shift_factor)
-        self.ps3 = PhaseShuffle(shift_factor)
-        self.ps4 = PhaseShuffle(shift_factor)
-        self.ps5 = PhaseShuffle(shift_factor)
-        self.ps6 = PhaseShuffle(shift_factor)
+        self.ps1 : Final[PhaseShuffle] = PhaseShuffle(shift_factor)
+        self.ps2 : Final[PhaseShuffle] = PhaseShuffle(shift_factor)
+        self.ps3 : Final[PhaseShuffle] = PhaseShuffle(shift_factor)
+        self.ps4 : Final[PhaseShuffle] = PhaseShuffle(shift_factor)
+        self.ps5 : Final[PhaseShuffle] = PhaseShuffle(shift_factor)
+        self.ps6 : Final[PhaseShuffle] = PhaseShuffle(shift_factor)
 
-        self.fc1 = nn.Linear(25000, 1)
+        self.fc1 : Final[nn.Linear] = nn.Linear(25000, 1)
 
         for m in self.modules():
             if isinstance(m, nn.Conv1d) or isinstance(m, nn.Linear):
                 nn.init.kaiming_normal_(m.weight.data)
 
-    def forward(self, x):
+    def forward(self, x : torch.Tensor) -> Any:
+
         x = F.leaky_relu(self.conv1(x), negative_slope=self.alpha)
         if self.verbose:
             print(x.shape)
