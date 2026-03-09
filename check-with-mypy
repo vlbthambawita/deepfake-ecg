@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# ==========================================================================
+#         ____                   __       _          _____ ____ ____
+#        |  _ \  ___  ___ _ __  / _| __ _| | _____  | ____/ ___/ ___|
+#        | | | |/ _ \/ _ \ '_ \| |_ / _` | |/ / _ \ |  _|| |  | |  _
+#        | |_| |  __/  __/ |_) |  _| (_| |   <  __/ | |__| |__| |_| |
+#        |____/ \___|\___| .__/|_|  \__,_|_|\_\___| |_____\____\____|
+#                        |_|
+#
+#                       --- Deepfake ECG Generator ---
+#                https://github.com/vlbthambawita/deepfake-ecg
+# ==========================================================================
+#
+# Command-Line Generator Tool
+# Copyright (C) 2025-2026 by Thomas Dreibholz
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Contact: Thomas Dreibholz <dreibh@simula.no>
+
+set -eu
+
+SCRIPTS="
+   examples/generator-tool
+   examples/generate_as_numpy.py
+   examples/generate_to_file.py
+   examples/simple.py
+"
+
+# ====== Find locations of Python interpreter and MyPy ======================
+PYTHON="$(whereis python| cut -d' ' -f2)"
+# shellcheck disable=SC2001
+MYPY="$(echo "${PYTHON}" | sed -e 's#/[^/]*$#/mypy#')"
+if [ ! -x "${PYTHON}" ] ; then
+   echo >&2 "ERROR: Unable to identify Python executable!"
+   exit 1
+fi
+if [ ! -x "${MYPY}" ] ; then
+   echo >&2 "ERROR: Unable to identify MyPy executable!"
+   exit 1
+fi
+
+# ====== Run MyPy ===========================================================
+for script in $SCRIPTS ; do
+   echo -e "\e[34mChecking ${script} ...\e[0m"
+   figlet -w 128 "$(basename "${script}")" | print-utf8 -n -C "[\e[36m" "\e[0m]"
+   "${MYPY}" --strict \
+      --install-types --non-interactive \
+      --ignore-missing-imports          \
+      --show-traceback                  \
+      --python-executable "${PYTHON}"   \
+      "${script}"
+done
