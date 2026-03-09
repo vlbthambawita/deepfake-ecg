@@ -38,27 +38,89 @@ SCRIPTS="
    examples/simple.py
 "
 
-# ====== Find locations of Python interpreter and MyPy ======================
-PYTHON="$(whereis python| cut -d' ' -f2)"
-# shellcheck disable=SC2001
-MYPY="$(echo "${PYTHON}" | sed -e 's#/[^/]*$#/mypy#')"
+
+# ###### Helper function to show failure ####################################
+exit-failed ()
+{
+   echo
+   "${PRINT_UTF8}" -n -s "\e[1;31;5m█" "▀" "█\e[0m" ;
+   echo "CHECK FAILED!" | "${FIGLET}" -w 128 | "${PRINT_UTF8}" -n -C "\e[1;31;5m█\e[25m" "\e[5m█\e[0m" ;
+   "${PRINT_UTF8}" -n -s "\e[1;31;5m█" "▄" "█\e[0m"
+   exit 1
+}
+
+
+# ###### Helper function to show success ####################################
+exit-success ()
+{
+   echo
+   "${PRINT_UTF8}" -n -s "\e[1;32m█" "▀" "█\e[0m" ;
+   echo "ALL CHECKS SUCCEEDED!" | "${FIGLET}" -w 128 | "${PRINT_UTF8}" -n -C "\e[1;32m█\e[25m" "█\e[0m" ;
+   "${PRINT_UTF8}" -n -s "\e[1;32m█" "▄" "█\e[0m"
+   exit 0
+}
+
+
+# ###### Helper function to show script information #########################
+show-script ()
+{
+   local script="$1"
+
+   "${PRINT_UTF8}" -n -s "\e[1;36m█" "▀" "█\e[0m" ;
+   "${FIGLET}" -w 128 "$(basename "${script}")" | "${PRINT_UTF8}" -n -C "\e[1;36m█\e[25m" "█\e[0m" ;
+   "${PRINT_UTF8}" -n -s "\e[1;36m█" "▄" "█\e[0m"
+}
+
+
+
+# ###### Main program #######################################################
+
+# ====== Find locations of Python interpreter, MyPy, and tools ==============
+PYTHON="$(whereis python | cut -d' ' -f2 || whereis python3 | cut -d' ' -f2)"
 if [ ! -x "${PYTHON}" ] ; then
    echo >&2 "ERROR: Unable to identify Python executable!"
    exit 1
 fi
+echo "Python: ${PYTHON}"
+# shellcheck disable=SC2001
+MYPY="$(echo "${PYTHON}" | sed -e 's#/[^/]*$#/mypy#')"
 if [ ! -x "${MYPY}" ] ; then
    echo >&2 "ERROR: Unable to identify MyPy executable!"
+   echo >&2 "Try this (within the correct Python environment):"
+   echo >&2 "pip install mypy"
    exit 1
 fi
+echo "MyPy: ${MYPY}"
+PRINT_UTF8="$(whereis print-utf8 | cut -d' ' -f2)"
+if [ ! -x "${PRINT_UTF8}" ] ; then
+   echo >&2 "ERROR: Print-UTF8 (from System-Tools) is not installed!"
+   echo >&2 "Try this:"
+   echo >&2 "* Ubuntu:  sudo apt-add-repository -sy ppa:dreibh/ppa"
+   echo >&2 "           sudo apt install -y td-system-tools"
+   echo >&2 "* Fedora:  sudo dnf copr enable -y dreibh/ppa"
+   echo >&2 "           sudo dnf install -y td-system-tools"
+   echo >&2 "* FreeBSD: sudo pkg install -y td-system-tools"
+   exit 1
+fi
+FIGLET="$(whereis figlet | cut -d' ' -f2)"
+if [ ! -x "${FIGLET}" ] ; then
+   echo >&2 "ERROR: Figlet is not installed!"
+   echo >&2 "* Ubuntu:  sudo apt install -y figlet"
+   echo >&2 "* Fedora:  sudo dnf install -y figlet"
+   echo >&2 "* FreeBSD: sudo pkg install -y figlet"
+   exit 1
+fi
+
 
 # ====== Run MyPy ===========================================================
 for script in $SCRIPTS ; do
    echo -e "\e[34mChecking ${script} ...\e[0m"
-   figlet -w 128 "$(basename "${script}")" | print-utf8 -n -C "[\e[36m" "\e[0m]"
+   show-script "${script}"
    "${MYPY}" --strict \
       --install-types --non-interactive \
       --ignore-missing-imports          \
       --show-traceback                  \
       --python-executable "${PYTHON}"   \
-      "${script}"
+      "${script}" || exit-failed
 done
+exit-success
