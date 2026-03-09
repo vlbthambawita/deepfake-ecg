@@ -15,7 +15,7 @@
 # Generator Library
 # Copyright (C) 2021-2025 by Vajira Thambawita
 # Copyright (C) 2021-2025 by Turtle <erencemayez@gmail.com>
-# Copyright (C) 2025 by Thomas Dreibholz
+# Copyright (C) 2025-2026 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,5 +35,5 @@
 # * Turtle <erencemayez@gmail.com>
 # * Thomas Dreibholz <dreibh@simula.no>
 
-from deepfakeecg.models      import Generator
+# from deepfakeecg.models      import Generator
 from deepfakeecg.deepfakeecg import *

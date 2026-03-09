@@ -14,7 +14,7 @@
 #
 # Deepfake ECG Example
 # Copyright (C) 2025 by Turtle <erencemayez@gmail.com>
-# Copyright (C) 2025 by Thomas Dreibholz
+# Copyright (C) 2025-2026 by Thomas Dreibholz
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
