@@ -46,7 +46,7 @@ NUMBER_OF_ECGs="$2"
 
 # ====== Generator loop =====================================================
 n=0
-while [ ${n} -lt ${NUMBER_OF_ECGs} ] ; do
+while [ ${n} -lt "${NUMBER_OF_ECGs}" ] ; do
    a=$(( n / 10000 ))
    r=$(( n - 10000 * a ))
    b=$(( r / 100 ))
@@ -59,7 +59,11 @@ while [ ${n} -lt ${NUMBER_OF_ECGs} ] ; do
    # Generate batch of 100 ECGs, if the first ECG is missing:
    firstECG="$(printf "${DIRECTORY}/${subdirectory}/ECG-%06d.csv.gz" "$((n + 1))")"
    if [ ! -e "${firstECG}" ] ; then
-      ./generator-tool --type ECG12 --format csv --output "${DIRECTORY}/${subdirectory}/ECG-{number:06d}.csv.gz" --start-id "${n}" --number 100
+      echo -e "\x1b[34mGenerating ECGs ${n} - $((n + 100)) ...\x1b[0m"
+      ./generator-tool \
+         --type ECG12 --format csv \
+         --output "${DIRECTORY}/${subdirectory}/ECG-{number:06d}.csv.gz" \
+         --start-id "${n}" --number 100
    fi
 
    n=$(( n + 100 ))
