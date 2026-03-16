@@ -67,11 +67,11 @@ try:
       sys.argv[1:],
       'n:t:l:f:o:s:e:d:v',
       [ 'number=',
-        'ecgtype=',
+        'type=',
         'length=',
         'format=',
         'output=',
-        'startid=',
+        'start-id=',
         'leads=',
         'device=',
         'version'
@@ -119,7 +119,7 @@ try:
          else:
             sys.stderr.write('ERROR: Invalid format ' + optarg + '!\n')
             sys.exit(1)
-      elif option in ( '-s', '--startid' ):
+      elif option in ( '-s', '--start-id' ):
          try:
             outputStartID = int(optarg)
             if outputStartID < 0:
