@@ -44,7 +44,7 @@ exit-failed ()
 {
    echo
    "${PRINT_UTF8}" -n -s "\e[1;31;5m█" "▀" "█\e[0m" ;
-   echo "CHECK FAILED!" | "${FIGLET}" -w 128 | "${PRINT_UTF8}" -n -C "\e[1;31;5m█\e[25m" "\e[5m█\e[0m" ;
+   echo "CHECK FAILED!" | "${FIGLET}" -w "${COLUMNS}" | "${PRINT_UTF8}" -n -C "\e[1;31;5m█\e[25m" "\e[5m█\e[0m" ;
    "${PRINT_UTF8}" -n -s "\e[1;31;5m█" "▄" "█\e[0m"
    exit 1
 }
@@ -55,7 +55,7 @@ exit-success ()
 {
    echo
    "${PRINT_UTF8}" -n -s "\e[1;32m█" "▀" "█\e[0m" ;
-   echo "ALL CHECKS SUCCEEDED!" | "${FIGLET}" -w 128 | "${PRINT_UTF8}" -n -C "\e[1;32m█\e[25m" "█\e[0m" ;
+   echo "ALL CHECKS SUCCEEDED!" | "${FIGLET}" -w "${COLUMNS}" | "${PRINT_UTF8}" -n -C "\e[1;32m█\e[25m" "█\e[0m" ;
    "${PRINT_UTF8}" -n -s "\e[1;32m█" "▄" "█\e[0m"
    exit 0
 }
@@ -67,7 +67,7 @@ show-script ()
    local script="$1"
 
    "${PRINT_UTF8}" -n -s "\e[1;36m█" "▀" "█\e[0m" ;
-   "${FIGLET}" -w 128 "$(basename "${script}")" | "${PRINT_UTF8}" -n -C "\e[1;36m█\e[25m" "█\e[0m" ;
+   "${FIGLET}" -w "${COLUMNS}" "$(basename "${script}")" | "${PRINT_UTF8}" -n -C "\e[1;36m█\e[25m" "█\e[0m" ;
    "${PRINT_UTF8}" -n -s "\e[1;36m█" "▄" "█\e[0m"
 }
 
@@ -76,7 +76,7 @@ show-script ()
 # ###### Main program #######################################################
 
 # ====== Find locations of Python interpreter, MyPy, and tools ==============
-PYTHON="$(whereis python | cut -d' ' -f2 || whereis python3 | cut -d' ' -f2)"
+PYTHON="$(which python 2>/dev/null || which python3 2>/dev/null || true)"
 if [ ! -x "${PYTHON}" ] ; then
    echo >&2 "ERROR: Unable to identify Python executable!"
    exit 1
@@ -91,7 +91,7 @@ if [ ! -x "${MYPY}" ] ; then
    exit 1
 fi
 echo "MyPy: ${MYPY}"
-PRINT_UTF8="$(whereis print-utf8 | cut -d' ' -f2)"
+PRINT_UTF8="$(which print-utf8 2>/dev/null || true)"
 if [ ! -x "${PRINT_UTF8}" ] ; then
    echo >&2 "ERROR: Print-UTF8 (from System-Tools) is not installed!"
    echo >&2 "Try this:"
@@ -102,7 +102,7 @@ if [ ! -x "${PRINT_UTF8}" ] ; then
    echo >&2 "* FreeBSD: sudo pkg install -y td-system-tools"
    exit 1
 fi
-FIGLET="$(whereis figlet | cut -d' ' -f2)"
+FIGLET="$(which figlet 2>/dev/null || true)"
 if [ ! -x "${FIGLET}" ] ; then
    echo >&2 "ERROR: Figlet is not installed!"
    echo >&2 "* Ubuntu:  sudo apt install -y figlet"
